@@ -3,7 +3,7 @@ import sys, time
 from datetime import datetime
 
 host = ''
-max_port = 30678
+max_port = 65535
 min_port = 1
 
 def scan_host(host, port, r_code = 1):
