@@ -79,7 +79,7 @@ def ssh_connect(userName, passWord, code = 0):
     try:
         # 期望
         for portList in opened_port:
-            ssh.connect(host, username = userName, password = passWord, port = portList)
+            ssh.connect(host, username = userName, password = passWord, port = portList, timeout = 10)
         pass
     except paramiko.AuthenticationException:
         #[*] Authentication FAiled ... （猜測失敗）
@@ -87,9 +87,9 @@ def ssh_connect(userName, passWord, code = 0):
     except socket.error as se:
         #[*] Connection Failed ... Host Down (找不到主機)
         code = 2
-    file
-    ssh.close()  
-    return code
+    finally:
+        ssh.close()  
+        return code
 
 inputFileUsername = open(userList, 'r')
 inputFilePasswd = open(passwdList, 'r')
