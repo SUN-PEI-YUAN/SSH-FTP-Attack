@@ -1,50 +1,57 @@
-from socket import * 
-import sys, time
-from datetime import datetime
+import paramiko, sys, os, socket
 
-host = ''
-max_port = 65535
-min_port = 1
+global host, username, line,input_file
 
-def scan_host(host, port, r_code = 1):
-    try:
-        s = socket(AF_INET, SOCK_STREAM)
-         
-        code = s.connect_ex((host, port))
 
-        if code == 0:
-            r_code = code
-            s.close()
-    except Exception as e:
-        pass
 
-    return r_code
+line = "\n-------------------------------------------------------\n"
 
 try:
-    host = input("[*] 輸入欲掃描之主機: ")
+    username = input("[*] 輸入ssh使用者帳戶: ")
+    inputPasswdFile = input("[*] 輸入欲猜測密碼清單位置: ")
+
+    if os.path.exists(inputPasswdFile) == False:
+        print("\n[*] 檔案路徑不存在！")
+        sys.exit(4)
 except KeyboardInterrupt:
-    print("\n\n[*] User Requsested An Interrupt.")
-    print("[*] Application Shutting Down.")
-    sys.exit(1)
+    print("\n\n[*] 取消動作！")
+    sys.exit(3)
 
-hostip = gethostbyname(host)
-print("\n[*] Host: %s IP: %s" % (host, hostip))
-print("[*] 掃描於 %s...\n" % (time.strftime("%H:%M:%S")))
-start_time = datetime.now()
+def ssh_connect(passwd, code = 0):
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-for port in range(min_port, max_port):
     try:
-        response = scan_host(host, port)
+        pass
+    except paramiko.AuthenticationException:
+        #[*] Authentication FAiled ...
+        code = 1
+    except socket.error as se:
+        #[*] Connection Failed ... Host Down
+        code = 2
+
+    ssh.close()  
+    return code
+
+input_file = open(inputPasswdFile)
+
+print("")
+
+for i in input_file.readlines():
+    password = i.strip("\n")
+    try:
+        response = ssh_connect(password)
 
         if response == 0:
-            print("[*] Port %d: Open" % port)
+            print("%s[*] User: %s [*] Password: %s%s" % (line, username, password, line))
+            sys.exit(0)
+        elif response == 1:
+            print("[*] User: %s [*] Password: %s >>> Login Incorrect !!! " % (username, password))
+        elif response == 1:
+            print("[*] Connection Could Not Be Established To Address: %s" % host)
+            sys.exit(2)
     except Exception as e:
+        print(e)
         pass
 
-stop_time = datetime.now()
-totalTimeDuration = stop_time - start_time
-print("\n[*] Scanning Finished At %s ..." % (time.strftime("%H:%M:%S")))
-print("[*] Scanning Duration: %s ..." % totalTimeDuration)
-print("[*] 掃瞄完畢 !")
-
-         
+# 測試路徑 = /Users/marksun/Desktop/專題/dict/ip
